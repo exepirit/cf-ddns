@@ -1,4 +1,4 @@
-package dns
+package lookup
 
 import (
 	"context"
