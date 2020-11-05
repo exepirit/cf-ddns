@@ -1,6 +1,7 @@
 package echoip
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -8,10 +9,17 @@ import (
 	"strings"
 )
 
-type IfconfigResolver struct{}
+type IfconfigResolver struct {
+	Client http.Client
+}
 
-func (IfconfigResolver) GetIP() (net.IP, error) {
-	resp, err := http.Get("https://ifconfig.co/")
+func (resolver *IfconfigResolver) GetIP(ctx context.Context) (net.IP, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", "https://ifconfig.co/", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := resolver.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}

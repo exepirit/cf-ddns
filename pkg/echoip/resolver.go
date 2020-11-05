@@ -1,7 +1,10 @@
 package echoip
 
-import "net"
+import (
+	"context"
+	"net"
+)
 
 type Resolver interface {
-	GetIP() (net.IP, error)
+	GetIP(ctx context.Context) (net.IP, error)
 }
