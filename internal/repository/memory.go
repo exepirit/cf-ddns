@@ -22,7 +22,7 @@ func (i *inMemoryRepo) Reset() error {
 
 func (i *inMemoryRepo) GetAll() []DDNSRecord {
 	i.lock.RLock()
-	defer i.lock.Unlock()
+	defer i.lock.RUnlock()
 	result := make([]DDNSRecord, len(i.records))
 	copy(result, i.records)
 	return result
