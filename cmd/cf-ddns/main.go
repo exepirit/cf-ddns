@@ -7,15 +7,20 @@ import (
 )
 
 func main() {
-	worker, err := makeWorker()
+	cfg, err := loadConfig()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
+	}
+
+	worker, err := makeWorker(cfg)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	go worker.Run()
 	repository.Set(repository.NewMemory())
 	engine := web.New()
-	if err := engine.Run(":8080"); err != nil {
+	if err := engine.Run(cfg.BindAddress); err != nil {
 		log.Fatal(err)
 	}
 }
