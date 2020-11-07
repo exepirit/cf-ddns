@@ -7,7 +7,7 @@ type inMemoryRepo struct {
 	lock    sync.RWMutex
 }
 
-func NewMemory() DDNSRepository {
+func NewMemory() RecordRepository {
 	return &inMemoryRepo{records: make([]DDNSRecord, 0)}
 }
 

@@ -23,10 +23,10 @@ func main() {
 	applicationBus.Subscribe(worker)
 
 	// Create DDNS records repository object
-	repo := bus.RepositoryConsumer{
-		DDNSRepository: repository.NewMemory(),
-	}
-	applicationBus.Subscribe(repo)
+	repo := repository.NewMemory()
+	applicationBus.Subscribe(bus.RepositoryConsumer{
+		RecordRepository: repo,
+	})
 
 	// Add records from repository to worker
 	records := repo.GetAll()
@@ -36,7 +36,7 @@ func main() {
 
 	// Start worker and application
 	go worker.Run()
-	engine := web.New()
+	engine := web.New(repo)
 	if err := engine.Run(cfg.BindAddress); err != nil {
 		log.Fatal(err)
 	}

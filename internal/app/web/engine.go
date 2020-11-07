@@ -1,9 +1,16 @@
 package web
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/exepirit/cf-ddns/internal/repository"
+	"github.com/gin-gonic/gin"
+)
+
+var recordsRepo repository.RecordGetter
 
 // New creates new gin.Engine and attach routes.
-func New() *gin.Engine {
+func New(repo repository.RecordGetter) *gin.Engine {
+	recordsRepo = repo
+
 	engine := gin.New()
 	engine.Static("/css", "web/css")
 	engine.LoadHTMLGlob("web/templates/*")

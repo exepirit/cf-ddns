@@ -5,8 +5,12 @@ type ObjectRepository interface {
 	Reset() error
 }
 
-type DDNSRepository interface {
+type RecordRepository interface {
 	ObjectRepository
-	GetAll() []DDNSRecord
+	RecordGetter
 	Add(record DDNSRecord) error
+}
+
+type RecordGetter interface {
+	GetAll() []DDNSRecord
 }

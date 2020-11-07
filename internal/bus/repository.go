@@ -6,7 +6,7 @@ import (
 )
 
 type RepositoryConsumer struct {
-	repository.DDNSRepository
+	repository.RecordRepository
 }
 
 func (r RepositoryConsumer) Consume(event interface{}) {
