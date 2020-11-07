@@ -2,6 +2,7 @@ package renewal
 
 import (
 	"context"
+	"github.com/exepirit/cf-ddns/internal/repository"
 	"log"
 	"time"
 
@@ -50,6 +51,10 @@ func (w *Worker) updateAllDomains() error {
 	return w.editor.updateDomain(ctx, domain)
 }
 
-func (w *Worker) AddDomain(name string, checkInterval time.Duration) {
-	w.domains.addDomain(name, checkInterval)
+func (w *Worker) Consume(event interface{}) {
+	switch event.(type) {
+	case repository.DDNSRecord:
+		record := event.(repository.DDNSRecord)
+		w.domains.addDomain(record.Domain, record.UpdatePeriod)
+	}
 }
