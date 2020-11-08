@@ -13,10 +13,11 @@ func New(repo repository.RecordGetter) *gin.Engine {
 
 	engine := gin.New()
 	engine.Static("/css", "web/css")
-	engine.LoadHTMLGlob("web/templates/*")
+	engine.LoadHTMLGlob("web/templates/**/*")
 	engine.Use(gin.Recovery(), gin.Logger())
 
 	engine.GET("/", RecordsPage)
+	engine.POST("/addrecord", AddDDNSRecord)
 
 	return engine
 }

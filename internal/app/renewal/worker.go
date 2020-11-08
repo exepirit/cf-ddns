@@ -2,6 +2,7 @@ package renewal
 
 import (
 	"context"
+	"github.com/exepirit/cf-ddns/internal/bus"
 	"github.com/exepirit/cf-ddns/internal/repository"
 	"log"
 	"time"
@@ -57,8 +58,8 @@ func (w *Worker) AddDomain(name string, checkInterval time.Duration) {
 
 func (w *Worker) Consume(event interface{}) {
 	switch event.(type) {
-	case repository.DDNSRecord:
-		record := event.(repository.DDNSRecord)
+	case bus.AddDomainRecord:
+		record := repository.DDNSRecord(event.(bus.AddDomainRecord))
 		w.AddDomain(record.Domain, record.UpdatePeriod)
 	}
 }

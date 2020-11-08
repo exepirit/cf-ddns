@@ -12,7 +12,7 @@ type RepositoryConsumer struct {
 func (r RepositoryConsumer) Consume(event interface{}) {
 	switch event.(type) {
 	case AddDomainRecord:
-		record := event.(repository.DDNSRecord)
+		record := repository.DDNSRecord(event.(AddDomainRecord))
 		if err := r.Add(record); err != nil {
 			log.Println(err)
 		}
