@@ -25,7 +25,7 @@ func main() {
 	// Create DDNS records repository object
 	repo := repository.NewMemory()
 	applicationBus.Subscribe(bus.RepositoryConsumer{
-		RecordRepository: repo,
+		BindingRepository: repo,
 	})
 
 	// Add records from repository to worker

@@ -5,10 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var recordsRepo repository.RecordGetter
+var recordsRepo repository.BindingGetter
 
 // New creates new gin.Engine and attach routes.
-func New(repo repository.RecordGetter) *gin.Engine {
+func New(repo repository.BindingGetter) *gin.Engine {
 	recordsRepo = repo
 
 	engine := gin.New()

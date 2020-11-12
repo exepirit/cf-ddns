@@ -5,17 +5,17 @@ type ObjectRepository interface {
 	Reset() error
 }
 
-type RecordRepository interface {
+type BindingRepository interface {
 	ObjectRepository
-	RecordGetter
-	RecordUpdater
-	Add(record DDNSRecord) error
+	BindingGetter
+	BindingUpdater
+	Add(b DnsBinding) error
 }
 
-type RecordGetter interface {
-	GetAll() []DDNSRecord
+type BindingGetter interface {
+	GetAll() []DnsBinding
 }
 
-type RecordUpdater interface {
-	Update(record DDNSRecord) error
+type BindingUpdater interface {
+	Update(b DnsBinding) error
 }

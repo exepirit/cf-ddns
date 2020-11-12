@@ -2,7 +2,7 @@ package repository
 
 import "time"
 
-type DDNSRecord struct {
+type DnsBinding struct {
 	Domain       string
 	UpdatePeriod time.Duration
 }

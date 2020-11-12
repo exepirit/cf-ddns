@@ -58,8 +58,8 @@ func (w *Worker) AddDomain(name string, checkInterval time.Duration) {
 
 func (w *Worker) Consume(event interface{}) {
 	switch event.(type) {
-	case bus.AddDomainRecord:
-		record := repository.DDNSRecord(event.(bus.AddDomainRecord))
+	case repository.DnsBinding:
+		record := event.(repository.DnsBinding)
 		w.AddDomain(record.Domain, record.UpdatePeriod)
 	}
 }
