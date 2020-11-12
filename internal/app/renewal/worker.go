@@ -2,11 +2,10 @@ package renewal
 
 import (
 	"context"
-	"github.com/exepirit/cf-ddns/internal/bus"
-	"github.com/exepirit/cf-ddns/internal/repository"
 	"log"
 	"time"
 
+	"github.com/exepirit/cf-ddns/internal/bus"
 	"github.com/exepirit/cf-ddns/pkg/ddns"
 	"github.com/exepirit/cf-ddns/pkg/echoip"
 	"github.com/exepirit/cf-ddns/pkg/lookup"
@@ -24,6 +23,7 @@ func NewWorker(ip echoip.Resolver, dnsResolver *lookup.Resolver, dnsUpdater *ddn
 		updater: dnsUpdater,
 	}
 	domains := newDomains()
+	bus.Get().Subscribe(domains)
 	return &Worker{
 		ipResolver: ip,
 		editor:     editor,
@@ -49,17 +49,14 @@ func (w *Worker) updateAllDomains() error {
 	domain := w.domains.next()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	return w.editor.updateDomain(ctx, domain)
+
+	err = w.editor.updateDomain(ctx, domain)
+	if err == nil {
+		bus.Get().Publish(bus.DnsRecordUpdated(domain))
+	}
+	return err
 }
 
 func (w *Worker) AddDomain(name string, checkInterval time.Duration) {
 	w.domains.addDomain(name, checkInterval)
-}
-
-func (w *Worker) Consume(event interface{}) {
-	switch event.(type) {
-	case repository.DnsBinding:
-		record := event.(repository.DnsBinding)
-		w.AddDomain(record.Domain, record.UpdatePeriod)
-	}
 }

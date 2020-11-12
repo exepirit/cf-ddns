@@ -15,16 +15,14 @@ func main() {
 	}
 
 	// Create update worker object
-	applicationBus := bus.Get()
 	worker, err := makeWorker(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	applicationBus.Subscribe(worker)
 
 	// Create DDNS records repository object
 	repo := repository.NewMemory()
-	applicationBus.Subscribe(bus.RepositoryConsumer{
+	bus.Get().Subscribe(bus.RepositoryConsumer{
 		BindingRepository: repo,
 	})
 
