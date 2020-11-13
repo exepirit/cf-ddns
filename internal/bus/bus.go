@@ -1,6 +1,11 @@
 package bus
 
-import "sync"
+import (
+	"fmt"
+	"log"
+	"sync"
+	"time"
+)
 
 type ApplicationBus struct {
 	consumers []Consumer
@@ -18,7 +23,17 @@ func (a *ApplicationBus) Publish(event interface{}) {
 	wg := sync.WaitGroup{}
 	consume := func(c Consumer) {
 		wg.Add(1)
-		c.Consume(event)
+		done := make(chan struct{})
+		go func() {
+			c.Consume(event)
+			done <- struct{}{}
+		}()
+		t := time.NewTimer(time.Second)
+		select {
+		case <-t.C:
+			log.Printf("failed consume %T event in consumer %T. possible deadlock", event, c)
+		case <-done:
+		}
 		wg.Done()
 	}
 
@@ -35,4 +50,5 @@ func (a *ApplicationBus) Subscribe(c Consumer) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	a.consumers = append(a.consumers, c)
+	fmt.Printf("Consumer %T registered\n", c)
 }

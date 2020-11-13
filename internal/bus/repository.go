@@ -12,8 +12,8 @@ type RepositoryConsumer struct {
 func (r RepositoryConsumer) Consume(event interface{}) {
 	switch event.(type) {
 	case AddDomainBinding:
-		record := event.(repository.DnsBinding)
-		if err := r.Add(record); err != nil {
+		record := event.(AddDomainBinding)
+		if err := r.Add(repository.DnsBinding(record)); err != nil {
 			log.Println(err)
 		}
 	case RemoveDomainBinding:
