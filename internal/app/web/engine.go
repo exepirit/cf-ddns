@@ -17,7 +17,7 @@ func New(repo repository.BindingGetter) *gin.Engine {
 	engine.Use(gin.Recovery(), gin.Logger())
 
 	engine.GET("/", RecordsPage)
-	engine.POST("/addrecord", AddDDNSRecord)
+	engine.POST("/addrecord", AddDnsBinding)
 
 	return engine
 }
