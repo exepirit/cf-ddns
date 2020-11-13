@@ -9,51 +9,75 @@ import (
 )
 
 type domains struct {
-	domainsTickers map[string]*time.Ticker
-	newDomain      chan string
-	lock           sync.RWMutex
+	domainsTickers    map[string]*time.Ticker
+	mapLock           sync.RWMutex
+	newBindings       chan repository.DnsBinding
+	nextPendingDomain chan string
 }
 
 func newDomains() *domains {
 	return &domains{
-		domainsTickers: map[string]*time.Ticker{},
-		newDomain:      make(chan string),
-		lock:           sync.RWMutex{},
+		domainsTickers:    map[string]*time.Ticker{},
+		newBindings:       make(chan repository.DnsBinding),
+		nextPendingDomain: make(chan string),
 	}
 }
 
-func (d *domains) next() string {
-	result := make(chan string)
-	done := make(chan struct{})
+func (d *domains) Handle(bus bus.Publisher) {
+	bus.Subscribe(d)
 
-	waitForDomain := func(domain string) {
+	go func() {
+		for {
+			d.putNextPending()
+		}
+	}()
+}
+
+func (d *domains) putNextPending() {
+	done := make(chan struct{})
+	result := make(chan string)
+
+	waitTicker := func(domain string, t *time.Ticker) {
 		select {
-		case <-d.domainsTickers[domain].C:
+		case <-t.C:
 			result <- domain
+			break
 		case <-done:
 			return
 		}
 	}
 
-	d.lock.RLock()
-	defer d.lock.RLocker()
-	for domain := range d.domainsTickers {
-		go waitForDomain(domain)
+	d.mapLock.RLock()
+	for domain, ticker := range d.domainsTickers {
+		go waitTicker(domain, ticker)
 	}
-	r := <-result
+	d.mapLock.RUnlock()
+
+	select {
+	case r := <-result:
+		d.nextPendingDomain <- r
+		break
+	case b := <-d.newBindings:
+		d.nextPendingDomain <- b.Domain
+		break
+	}
+
 	close(done)
-	return r
 }
 
 func (d *domains) addDomain(name string, checkInterval time.Duration) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
+	d.newBindings <- repository.DnsBinding{
+		Domain:       name,
+		UpdatePeriod: checkInterval,
+	}
+	d.mapLock.Lock()
+	defer d.mapLock.Unlock()
 	d.domainsTickers[name] = time.NewTicker(checkInterval)
 }
 
 func (d *domains) removeDomain(name string) bool {
-	d.lock.Lock()
-	defer d.lock.Unlock()
+	d.mapLock.Lock()
+	defer d.mapLock.Unlock()
 	_, ok := d.domainsTickers[name]
 	if ok {
 		delete(d.domainsTickers, name)
@@ -64,11 +88,13 @@ func (d *domains) removeDomain(name string) bool {
 func (d *domains) Consume(event interface{}) {
 	switch event.(type) {
 	case bus.AddDomainBinding:
-		binding := event.(repository.DnsBinding)
+		binding := event.(bus.AddDomainBinding)
 		d.addDomain(binding.Domain, binding.UpdatePeriod)
+		break
 	case bus.RemoveDomainBinding:
-		binding := event.(repository.DnsBinding)
+		binding := event.(bus.RemoveDomainBinding)
 		d.removeDomain(binding.Domain)
+		break
 	case bus.UpdateDomainBinding:
 		panic("implement me")
 	}

@@ -23,7 +23,7 @@ func NewWorker(ip echoip.Resolver, dnsResolver *lookup.Resolver, dnsUpdater *ddn
 		updater: dnsUpdater,
 	}
 	domains := newDomains()
-	bus.Get().Subscribe(domains)
+	domains.Handle(bus.Get())
 	return &Worker{
 		ipResolver: ip,
 		editor:     editor,
@@ -40,15 +40,15 @@ func (w *Worker) Run() {
 }
 
 func (w *Worker) updateAllDomains() error {
+	domain := <-w.domains.nextPendingDomain
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
 	currentIp, err := w.ipResolver.GetIP(context.Background())
 	if err != nil {
 		return err
 	}
 	w.editor.currentIp = currentIp
-
-	domain := w.domains.next()
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
 
 	err = w.editor.updateDomain(ctx, domain)
 	if err == nil {
