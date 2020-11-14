@@ -1,0 +1,33 @@
+<div class="modal fade" id="addRecordModal" tabindex="-1" aria-labelledby="addRecordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRecordModalLabel">Add DDNS record</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" action="/addrecord">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="domain">Domain name</label>
+                        <input type="text" class="form-control" id="domain" name="domain">
+                    </div>
+                    <div class="form-group">
+                        <label for="updatePeriod">Update period</label>
+                        <select class="form-control" id="updatePeriod" name="updatePeriod">
+                            <option>15s</option>
+                            <option>30s</option>
+                            <option>1m</option>
+                            <option>5m</option>
+                            <option>15m</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" class="btn btn-primary" value="Add record">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
