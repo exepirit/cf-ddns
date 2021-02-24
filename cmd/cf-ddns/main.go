@@ -4,6 +4,7 @@ import (
 	"github.com/exepirit/cf-ddns/internal/app/web"
 	"github.com/exepirit/cf-ddns/internal/bus"
 	"github.com/exepirit/cf-ddns/internal/repository"
+	"github.com/pkg/errors"
 	"log"
 )
 
@@ -20,8 +21,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Create DDNS records repository object
-	repo := repository.NewMemory()
+	// Create DDNS bindings repository object
+	repo := makeDataRepository()
 	bus.Get().Subscribe(bus.RepositoryConsumer{
 		BindingRepository: repo,
 	})
@@ -38,4 +39,17 @@ func main() {
 	if err := engine.Run(cfg.BindAddress); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func makeDataRepository() repository.BindingRepository {
+	repo, err := repository.NewSqlite("cf-ddns.sqlite3")
+	if err != nil {
+		log.Fatalln(errors.WithMessage(err, "failed to create database"))
+	}
+
+	if err := repo.Init(); err != nil {
+		log.Fatalln(errors.WithMessage(err, "failed to init database"))
+	}
+
+	return repo
 }
