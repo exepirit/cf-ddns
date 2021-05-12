@@ -16,3 +16,6 @@
 
 # Local configuration files
 config.local.*
+
+.vscode/
+.idea/
