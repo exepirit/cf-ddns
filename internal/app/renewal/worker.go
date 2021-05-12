@@ -2,7 +2,7 @@ package renewal
 
 import (
 	"context"
-	"log"
+	"net"
 	"time"
 
 	"github.com/exepirit/cf-ddns/internal/bus"
@@ -11,35 +11,30 @@ import (
 	"github.com/exepirit/cf-ddns/pkg/lookup"
 )
 
-type Worker struct {
-	ipResolver echoip.Resolver
-	editor     *dnsEditor
-	domains    *domains
+// Renewer update domains A records, if they IP addresses, defined in DNS A records are not refers to current host IP.
+type Renewer interface {
+	RenewAllDomains() error
+	AddDomain(domain string, checkPeriod time.Duration) error
 }
 
-func NewWorker(ip echoip.Resolver, dnsResolver *lookup.Resolver, dnsUpdater *ddns.Updater) *Worker {
-	editor := &dnsEditor{
-		dns:     dnsResolver,
-		updater: dnsUpdater,
-	}
-	domains := newDomains()
-	domains.Handle(bus.Get())
-	return &Worker{
-		ipResolver: ip,
-		editor:     editor,
-		domains:    domains,
+// NewRenewer produce new Renewer.
+func NewRenewer(ip echoip.Resolver, dnsResolver *lookup.Resolver, dnsUpdater *ddns.Updater) Renewer {
+	return &renewer{
+		ipResolver:  ip,
+		dnsResolver: dnsResolver,
+		dnsUpdater:  dnsUpdater,
+		domains:     newDomains(),
 	}
 }
 
-func (w *Worker) Run() {
-	for {
-		if err := w.updateAllDomains(); err != nil {
-			log.Println(err)
-		}
-	}
+type renewer struct {
+	ipResolver  echoip.Resolver
+	dnsResolver *lookup.Resolver
+	dnsUpdater  *ddns.Updater
+	domains     *domains
 }
 
-func (w *Worker) updateAllDomains() error {
+func (w *renewer) RenewAllDomains() error {
 	domain := <-w.domains.nextPendingDomain
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -48,15 +43,33 @@ func (w *Worker) updateAllDomains() error {
 	if err != nil {
 		return err
 	}
-	w.editor.currentIp = currentIp
 
-	err = w.editor.updateDomain(ctx, domain)
+	err = w.setDomainARecord(ctx, domain, currentIp)
 	if err == nil {
 		bus.Get().Publish(bus.DnsRecordUpdated(domain))
 	}
 	return err
 }
 
-func (w *Worker) AddDomain(name string, checkInterval time.Duration) {
-	w.domains.addDomain(name, checkInterval)
+func (r *renewer) setDomainARecord(ctx context.Context, domain string, ip net.IP) error {
+	resolvedIPs, err := r.dnsResolver.LookupIP(ctx, domain)
+	if err != nil {
+		return err
+	}
+
+	for _, currentIp := range resolvedIPs {
+		if !currentIp.IP.Equal(ip) {
+			if err = r.dnsUpdater.UpdateARecord(domain, ip); err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+
+	return nil
+}
+
+func (r *renewer) AddDomain(name string, checkPeriod time.Duration) error {
+	r.domains.addDomain(name, checkPeriod)
+	return nil
 }
