@@ -32,10 +32,11 @@ func (target Target) Equal(other Target) bool {
 
 // Endpoint is a IP (Service) - Domain connection.
 type Endpoint struct {
+	ID         string `json:"id,omitempty"`
 	DNSName    string `json:"dnsName"`
 	Target     Target `json:"target"`
 	RecordType string `json:"recordType"`
-	TTL        int64  `json:"ttl"`
+	TTL        int    `json:"ttl"`
 }
 
 func NewEndpoint(dnsName, recordType string, targets ...string) *Endpoint {

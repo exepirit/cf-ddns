@@ -67,3 +67,15 @@ func TestPlan_ChangeDomainTarget_Eval(t *testing.T) {
 	require.Len(t, plan.Changes.Update, 1, "unexpected update in diff")
 	require.Equal(t, desired[0].Target, plan.Changes.Update[0].Target)
 }
+
+func TestPlan_EmptyChanges_Eval(t *testing.T) {
+	var current, desired []*domain.Endpoint
+	plan := &Plan{Current: current, Desired: desired}
+
+	plan.Eval()
+
+	require.NotNil(t, plan.Changes)
+	require.Len(t, plan.Changes.Create, 0)
+	require.Len(t, plan.Changes.Delete, 0)
+	require.Len(t, plan.Changes.Update, 0)
+}
