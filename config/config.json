@@ -1,6 +1,0 @@
-{
-  "cloudflareToken": "TOKEN",
-  "cloudflareZone": "example.com",
-  "bindAddress": "0.0.0.0:8000",
-  "dnsServer": "8.8.8.8"
-}
