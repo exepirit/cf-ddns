@@ -5,7 +5,6 @@ import (
 	"github.com/exepirit/cf-ddns/domain"
 	"github.com/exepirit/cf-ddns/plan"
 	"github.com/pkg/errors"
-	"os"
 )
 
 type Provider struct {
@@ -13,22 +12,17 @@ type Provider struct {
 	CF   *cloudflare.API
 }
 
-func NewProvider(zoneName string) (*Provider, error) {
-	api, err := cloudflare.New(os.Getenv("CF_API_KEY"), os.Getenv("CF_API_EMAIL"))
+func NewProvider(zoneID, apiKey, email string) (*Provider, error) {
+	api, err := cloudflare.New(apiKey, email)
 	if err != nil {
 		return nil, errors.WithMessage(err, "unable connect")
 	}
 
-	zone, err := api.ListZones(zoneName)
-	if err != nil {
-		return nil, errors.WithMessage(err, "unable get DNS zones list")
-	}
-	if len(zone) == 0 {
-		return nil, errors.New("could not find zone")
-	}
 	return &Provider{
-		Zone: zone[0],
-		CF:   api,
+		Zone: cloudflare.Zone{
+			ID: zoneID,
+		},
+		CF: api,
 	}, nil
 }
 
