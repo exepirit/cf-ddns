@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+	"path/filepath"
 
 	"github.com/exepirit/cf-ddns/domain"
 	"github.com/pkg/errors"
@@ -9,7 +10,44 @@ import (
 	networking "k8s.io/api/networking/v1beta1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 )
+
+func New() (*Source, error) {
+	source, err := NewForServiceAccount()
+	if err == nil {
+		return source, nil
+	}
+
+	return NewForConfig()
+}
+
+func NewForConfig() (*Source, error) {
+	home := homedir.HomeDir()
+	config, err := clientcmd.BuildConfigFromFlags("", filepath.Join(home, ".kube", "config"))
+	if err != nil {
+		return nil, err
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	return &Source{
+		client: clientset,
+	}, err
+}
+
+func NewForServiceAccount() (*Source, error) {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	return &Source{
+		client: clientset,
+	}, err
+}
 
 type Source struct {
 	client *kubernetes.Clientset
