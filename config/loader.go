@@ -1,18 +1,11 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/kelseyhightower/envconfig"
+)
 
 func Load() (*Config, error) {
-	viper.SetConfigType("env")
-	viper.SetEnvPrefix("ddns")
-	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, err
-	}
-
 	cfg := &Config{}
-	err = viper.Unmarshal(cfg)
+	err := envconfig.Process("ddns", cfg)
 	return cfg, err
 }
