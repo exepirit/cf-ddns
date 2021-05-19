@@ -6,18 +6,32 @@ import (
 	"os"
 	"time"
 
+	"github.com/exepirit/cf-ddns/config"
 	"github.com/exepirit/cf-ddns/control"
 	"github.com/exepirit/cf-ddns/provider"
 	"github.com/exepirit/cf-ddns/source"
 )
 
 func main() {
-	stubProvider := &provider.Stub{
-		Logger: log.Default(),
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	provider, err := provider.NewFromConfig(&provider.Config{
+		ProviderType:     cfg.Provider,
+		CloudflareZoneID: cfg.CfZoneID,
+		CloudflareApiKey: cfg.CfApiKey,
+		CloudflareEmail:  cfg.CfEmail,
+	})
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	src, err := source.NewFromConfig(&source.Config{
-		SourceType: "static",
+		SourceType: cfg.Source,
 	})
 	if err != nil {
 		fmt.Println(err)
@@ -26,7 +40,7 @@ func main() {
 
 	controller := control.Controller{
 		Source:     src,
-		Provider:   stubProvider,
+		Provider:   provider,
 		TimePeriod: time.Minute,
 	}
 
