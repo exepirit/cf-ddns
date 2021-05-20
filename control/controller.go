@@ -1,11 +1,12 @@
 package control
 
 import (
+	"time"
+
 	"github.com/exepirit/cf-ddns/plan"
 	"github.com/exepirit/cf-ddns/provider"
 	"github.com/exepirit/cf-ddns/source"
 	"github.com/pkg/errors"
-	"time"
 )
 
 type Controller struct {
@@ -17,12 +18,12 @@ type Controller struct {
 func (ctrl *Controller) RunOnce() error {
 	currentState, err := ctrl.Provider.CurrentEndpoints()
 	if err != nil {
-		return errors.WithMessage(err, "failed to get bonded domains")
+		return errors.WithMessage(err, "get bonded domains")
 	}
 
 	desiredState, err := ctrl.Source.GetEndpoints()
 	if err != nil {
-		return errors.WithMessage(err, "failed to get desired domains")
+		return errors.WithMessage(err, "get desired domains")
 	}
 
 	currentPlan := plan.Plan{

@@ -58,12 +58,12 @@ func (s *Source) GetEndpoints() ([]*domain.Endpoint, error) {
 
 	domains, err := s.getDomainNames(ctx)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get domains")
+		return nil, errors.WithMessage(err, "get domains")
 	}
 
 	targets, err := s.getTargets(ctx)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get targets")
+		return nil, errors.WithMessage(err, "get targets")
 	}
 
 	endpoints := make([]*domain.Endpoint, len(domains))

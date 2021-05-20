@@ -15,7 +15,7 @@ type Provider struct {
 func NewProvider(zoneID, apiKey, email string) (*Provider, error) {
 	api, err := cloudflare.New(apiKey, email)
 	if err != nil {
-		return nil, errors.WithMessage(err, "unable connect")
+		return nil, errors.WithMessage(err, "unable connect to cloudflare")
 	}
 
 	return &Provider{
@@ -76,7 +76,7 @@ func (provider *Provider) createRecords(endpoints []*domain.Endpoint) error {
 		}
 		_, err = provider.CF.CreateDNSRecord(provider.Zone.ID, record)
 		if err != nil {
-			return errors.WithMessagef(err, "failed to create domain %q", endpoint.DNSName)
+			return errors.WithMessagef(err, "create domain %q", endpoint.DNSName)
 		}
 	}
 	return err
@@ -87,7 +87,7 @@ func (provider *Provider) deleteRecords(endpoints []*domain.Endpoint) error {
 	for _, endpoint := range endpoints {
 		err = provider.CF.DeleteDNSRecord(provider.Zone.ID, endpoint.ID)
 		if err != nil {
-			return errors.WithMessagef(err, "failed to delete domain %q", endpoint.DNSName)
+			return errors.WithMessagef(err, "delete domain %q", endpoint.DNSName)
 		}
 	}
 	return err
@@ -104,7 +104,7 @@ func (provider *Provider) updateRecords(endpoints []*domain.Endpoint) error {
 		}
 		err = provider.CF.UpdateDNSRecord(provider.Zone.ID, endpoint.ID, record)
 		if err != nil {
-			return errors.WithMessagef(err, "failed to update domain %q", endpoint.DNSName)
+			return errors.WithMessagef(err, "update domain %q", endpoint.DNSName)
 		}
 	}
 	return err
@@ -113,7 +113,7 @@ func (provider *Provider) updateRecords(endpoints []*domain.Endpoint) error {
 func (provider *Provider) CurrentEndpoints() ([]*domain.Endpoint, error) {
 	records, err := provider.CF.DNSRecords(provider.Zone.ID, cloudflare.DNSRecord{})
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to get current DNS records")
+		return nil, errors.WithMessage(err, "get current DNS records")
 	}
 
 	endpoints := make([]*domain.Endpoint, len(records))
