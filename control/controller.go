@@ -13,6 +13,8 @@ type Controller struct {
 	Source     source.Source
 	Provider   provider.Provider
 	TimePeriod time.Duration
+
+	// TODO: add unmanaged domains list. or managed ;)
 }
 
 func (ctrl *Controller) RunOnce() error {

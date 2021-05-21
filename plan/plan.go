@@ -7,6 +7,7 @@ type Plan struct {
 	Current []*domain.Endpoint
 	Desired []*domain.Endpoint
 	Changes *Changes
+	// TODO: add unmanaged domains
 }
 
 // Eval calculate difference between current and desired state.
