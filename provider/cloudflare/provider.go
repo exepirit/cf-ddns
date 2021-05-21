@@ -5,6 +5,7 @@ import (
 	"github.com/exepirit/cf-ddns/domain"
 	"github.com/exepirit/cf-ddns/plan"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 type Provider struct {
@@ -49,7 +50,7 @@ func (provider *Provider) ApplyPlan(p plan.Plan) error {
 func (provider *Provider) resolveRecords(endpoints []*domain.Endpoint) {
 	records, err := provider.CF.DNSRecords(provider.Zone.ID, cloudflare.DNSRecord{})
 	if err != nil {
-		return // TODO: error logging
+		log.Error().Err(err).Msg("failed to resolve records")
 	}
 
 	for _, endpoint := range endpoints {
@@ -78,6 +79,10 @@ func (provider *Provider) createRecords(endpoints []*domain.Endpoint) error {
 		if err != nil {
 			return errors.WithMessagef(err, "create domain %q", endpoint.DNSName)
 		}
+		log.Info().
+			Str("domain", endpoint.DNSName).
+			Str("ip", endpoint.Target[0]).
+			Msg("new domain created")
 	}
 	return err
 }
@@ -89,6 +94,7 @@ func (provider *Provider) deleteRecords(endpoints []*domain.Endpoint) error {
 		if err != nil {
 			return errors.WithMessagef(err, "delete domain %q", endpoint.DNSName)
 		}
+		log.Info().Msgf("domain %q removed", endpoint.DNSName)
 	}
 	return err
 }
@@ -106,6 +112,10 @@ func (provider *Provider) updateRecords(endpoints []*domain.Endpoint) error {
 		if err != nil {
 			return errors.WithMessagef(err, "update domain %q", endpoint.DNSName)
 		}
+		log.Info().
+			Str("domain", endpoint.DNSName).
+			Str("ip", endpoint.Target[0]).
+			Msg("domain bound updated")
 	}
 	return err
 }

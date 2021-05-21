@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	"github.com/exepirit/cf-ddns/config"
 	"github.com/exepirit/cf-ddns/control"
@@ -13,10 +14,12 @@ import (
 )
 
 func main() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Info().Msg("setting up cf-ddns...")
+
 	cfg, err := config.Load()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal().Err(err)
 	}
 
 	provider, err := provider.NewFromConfig(&provider.Config{
@@ -26,16 +29,14 @@ func main() {
 		CloudflareEmail:  cfg.CfEmail,
 	})
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("create provider")
 	}
 
 	src, err := source.NewFromConfig(&source.Config{
 		SourceType: cfg.Source,
 	})
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("create domains source")
 	}
 
 	controller := control.Controller{
@@ -46,6 +47,6 @@ func main() {
 
 	err = controller.Run()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal().Err(err).Msg("")
 	}
 }
