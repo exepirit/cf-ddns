@@ -15,8 +15,10 @@ import (
 )
 
 func main() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	log.Info().Msg("setting up cf-ddns...")
+	log.Logger = log.Output(zerolog.ConsoleWriter{
+		TimeFormat: time.RFC822,
+		Out:        os.Stderr,
+	})
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -47,8 +49,5 @@ func main() {
 		TimePeriod: time.Minute,
 	}
 
-	err = controller.Run()
-	if err != nil {
-		log.Fatal().Err(err).Msg("")
-	}
+	controller.Run()
 }

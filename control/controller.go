@@ -8,6 +8,7 @@ import (
 	"github.com/exepirit/cf-ddns/provider"
 	"github.com/exepirit/cf-ddns/source"
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 type Controller struct {
@@ -38,7 +39,8 @@ func (ctrl *Controller) RunOnce() error {
 	return err
 }
 
-func (ctrl *Controller) Run() error {
+func (ctrl *Controller) Run() {
+	log.Info().Msg("DNS zone controller started")
 	ticker := time.NewTicker(ctrl.TimePeriod)
 	defer ticker.Stop()
 
@@ -46,7 +48,7 @@ func (ctrl *Controller) Run() error {
 	for {
 		err = ctrl.RunOnce()
 		if err != nil {
-			return err
+			log.Error().Err(err).Msg("one or more error occured")
 		}
 		<-ticker.C
 	}
