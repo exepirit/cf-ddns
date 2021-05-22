@@ -3,6 +3,7 @@ package control
 import (
 	"time"
 
+	"github.com/exepirit/cf-ddns/domain"
 	"github.com/exepirit/cf-ddns/plan"
 	"github.com/exepirit/cf-ddns/provider"
 	"github.com/exepirit/cf-ddns/source"
@@ -13,20 +14,19 @@ type Controller struct {
 	Source     source.Source
 	Provider   provider.Provider
 	TimePeriod time.Duration
-
-	// TODO: add unmanaged domains list. or managed ;)
 }
 
 func (ctrl *Controller) RunOnce() error {
-	currentState, err := ctrl.Provider.CurrentEndpoints()
-	if err != nil {
-		return errors.WithMessage(err, "get bonded domains")
-	}
-
 	desiredState, err := ctrl.Source.GetEndpoints()
 	if err != nil {
 		return errors.WithMessage(err, "get desired domains")
 	}
+
+	currentState, err := ctrl.Provider.CurrentEndpoints()
+	if err != nil {
+		return errors.WithMessage(err, "get bonded domains")
+	}
+	currentState = ctrl.filterUnmanagedDomains(currentState, desiredState)
 
 	currentPlan := plan.Plan{
 		Current: currentState,
@@ -50,4 +50,23 @@ func (ctrl *Controller) Run() error {
 		}
 		<-ticker.C
 	}
+}
+
+func (*Controller) filterUnmanagedDomains(inp, managed []*domain.Endpoint) []*domain.Endpoint {
+	isManaged := func(domain string) bool {
+		for _, e := range managed {
+			if e.DNSName == domain {
+				return true
+			}
+		}
+		return false
+	}
+
+	var result []*domain.Endpoint
+	for _, endpoint := range inp {
+		if isManaged(endpoint.DNSName) {
+			result = append(result, endpoint)
+		}
+	}
+	return result
 }
