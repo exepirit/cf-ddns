@@ -9,6 +9,7 @@ import (
 
 	"github.com/exepirit/cf-ddns/config"
 	"github.com/exepirit/cf-ddns/control"
+	"github.com/exepirit/cf-ddns/pkg/echoip"
 	"github.com/exepirit/cf-ddns/provider"
 	"github.com/exepirit/cf-ddns/source"
 )
@@ -38,6 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("create domains source")
 	}
+	src = source.WithResolvedTarget(src, &echoip.IfconfigResolver{})
 
 	controller := control.Controller{
 		Source:     src,
