@@ -1,9 +1,10 @@
 package static
 
 import (
-	"github.com/exepirit/cf-ddns/domain"
 	"os"
 	"strings"
+
+	"github.com/exepirit/cf-ddns/domain"
 )
 
 type Source struct {

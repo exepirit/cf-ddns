@@ -37,6 +37,7 @@ func main() {
 
 	src, err := source.NewFromConfig(&source.Config{
 		SourceType: cfg.Source,
+		FilePath:   cfg.FilePath,
 	})
 	if err != nil {
 		log.Fatal().Err(err).Msg("create domains source")

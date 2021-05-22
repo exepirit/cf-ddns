@@ -6,4 +6,5 @@ type Config struct {
 	CfApiKey string
 	CfEmail  string
 	CfZoneID string
+	FilePath string
 }
