@@ -22,7 +22,7 @@ func WithResolvedTarget(source Source, resolver echoip.Resolver) Source {
 }
 
 func (source *resolvedSource) GetEndpoints() ([]*domain.Endpoint, error) {
-	endpoints, err := source.GetEndpoints()
+	endpoints, err := source.inner.GetEndpoints()
 	if len(endpoints) == 0 {
 		return endpoints, err
 	}
