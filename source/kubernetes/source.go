@@ -1,3 +1,5 @@
+// TODO: remove kubernetes/client-go usage
+
 package kubernetes
 
 import (

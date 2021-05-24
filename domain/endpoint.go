@@ -47,3 +47,10 @@ func NewEndpoint(dnsName, recordType string, targets ...string) *Endpoint {
 		TTL:        0,
 	}
 }
+
+// Equal returns true if other Endpoint is same than target.
+func (e *Endpoint) Equal(other *Endpoint) bool {
+	return e.DNSName == other.DNSName &&
+		e.RecordType == other.RecordType &&
+		e.Target.Equal(other.Target)
+}

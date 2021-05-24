@@ -15,6 +15,8 @@ type Controller struct {
 	Source     source.Source
 	Provider   provider.Provider
 	TimePeriod time.Duration
+
+	previousDesired []*domain.Endpoint
 }
 
 func (ctrl *Controller) RunOnce() error {
@@ -27,13 +29,17 @@ func (ctrl *Controller) RunOnce() error {
 	if err != nil {
 		return errors.WithMessage(err, "get bonded domains")
 	}
-	currentState = ctrl.filterUnmanagedDomains(currentState, desiredState)
+
+	// managed = current - reviousDesired - currentDesired
+	unmanaged := removeEndpoints(removeEndpoints(currentState, ctrl.previousDesired), desiredState)
+	managed := removeEndpoints(currentState, unmanaged)
 
 	currentPlan := plan.Plan{
-		Current: currentState,
+		Current: managed,
 		Desired: desiredState,
 	}
 	currentPlan.Eval()
+	ctrl.previousDesired = desiredState
 
 	err = ctrl.Provider.ApplyPlan(currentPlan)
 	return err
@@ -54,21 +60,43 @@ func (ctrl *Controller) Run() {
 	}
 }
 
-func (*Controller) filterUnmanagedDomains(inp, managed []*domain.Endpoint) []*domain.Endpoint {
-	isManaged := func(domain string) bool {
-		for _, e := range managed {
-			if e.DNSName == domain {
+func (ctrl *Controller) getManagedEndpoints(desiredState []*domain.Endpoint) []*domain.Endpoint {
+	managed := make([]*domain.Endpoint, len(ctrl.previousDesired)+len(desiredState))
+	managedEndpointsCount := 0
+
+	inManaged := func(e *domain.Endpoint) bool {
+		for _, m := range managed {
+			if m.Equal(e) {
 				return true
 			}
 		}
 		return false
 	}
 
-	var result []*domain.Endpoint
-	for _, endpoint := range inp {
-		if isManaged(endpoint.DNSName) {
-			result = append(result, endpoint)
+	copy(managed[:len(ctrl.previousDesired)], ctrl.previousDesired[:])
+	managedEndpointsCount += len(ctrl.previousDesired)
+	for _, endpoint := range ctrl.previousDesired {
+		if !inManaged(endpoint) {
+			managed[managedEndpointsCount] = endpoint
+			managedEndpointsCount++
 		}
 	}
-	return result
+
+	return managed[:managedEndpointsCount]
+}
+
+func removeEndpoints(array []*domain.Endpoint, prune []*domain.Endpoint) []*domain.Endpoint {
+	arr := make([]*domain.Endpoint, len(array))
+	copy(arr[:], array[:])
+	for i := 0; i < len(arr); i++ {
+		origin := arr[i]
+		for _, rem := range prune {
+			if origin.Equal(rem) {
+				arr = append(arr[:i], arr[i+1:]...)
+				i--
+				break
+			}
+		}
+	}
+	return arr
 }
