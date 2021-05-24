@@ -82,7 +82,7 @@ func (provider *Provider) createRecords(endpoints []*domain.Endpoint) error {
 		log.Info().
 			Str("domain", endpoint.DNSName).
 			Str("ip", endpoint.Target[0]).
-			Msg("new domain created")
+			Msg("new domain assigned")
 	}
 	return err
 }
@@ -94,7 +94,7 @@ func (provider *Provider) deleteRecords(endpoints []*domain.Endpoint) error {
 		if err != nil {
 			return errors.WithMessagef(err, "delete domain %q", endpoint.DNSName)
 		}
-		log.Info().Msgf("domain %q removed", endpoint.DNSName)
+		log.Info().Str("domain", endpoint.DNSName).Msg("domain removed")
 	}
 	return err
 }
