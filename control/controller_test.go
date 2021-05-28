@@ -29,9 +29,10 @@ func assertDNSChanges(t *testing.T, expected []string, actual []*domain.Endpoint
 
 func TestController_RunOnce(t *testing.T) {
 	table := []struct {
-		name           string
-		currentDomains []string
-		desiredDomains []string
+		name            string
+		currentDomains  []string
+		desiredDomains  []string
+		previousDesired []string
 
 		addedDomains   []string
 		removedDomains []string
@@ -44,10 +45,11 @@ func TestController_RunOnce(t *testing.T) {
 			addedDomains:   []string{"test.example.com"},
 		},
 		{
-			name:           "remove managed domain",
-			currentDomains: []string{"example.com", "test.example.com"},
-			desiredDomains: []string{"example.com"},
-			removedDomains: []string{"test.example.com"},
+			name:            "remove managed domain",
+			currentDomains:  []string{"example.com", "test.example.com"},
+			previousDesired: []string{"example.com", "test.example.com"},
+			desiredDomains:  []string{"example.com"},
+			removedDomains:  []string{"test.example.com"},
 		},
 		{
 			name:           "ignore unmanaged domain",
@@ -67,9 +69,11 @@ func TestController_RunOnce(t *testing.T) {
 			fakeProvider.On("CurrentEndpoints").Return(current, nil)
 			fakeProvider.On("ApplyPlan", mock.Anything).Return(nil).Once()
 
+			previousDesired := endpointsFromDomains(testCase.previousDesired)
 			ctrl := &Controller{
-				Source:   fakeSource,
-				Provider: fakeProvider,
+				Source:          fakeSource,
+				Provider:        fakeProvider,
+				previousDesired: previousDesired,
 			}
 			err := ctrl.RunOnce()
 			require.NoError(t, err)
