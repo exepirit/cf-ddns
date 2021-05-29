@@ -19,3 +19,4 @@ config.local.*
 
 .vscode/
 .idea/
+*.local.*
