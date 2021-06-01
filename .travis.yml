@@ -1,0 +1,16 @@
+language: go
+
+services:
+- docker
+
+os: linux
+arch:
+- arm64
+
+jobs:
+  include:
+  - stage: build docker image
+    script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdi
+    - docker build -t $DOCKER_USERNAME/cf-ddns .
+    - docker push $DOCKER_USERNAME/cf-ddns
