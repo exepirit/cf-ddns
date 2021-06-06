@@ -6,11 +6,6 @@ platform:
   arch: arm64
   os: linux
 
-trigger:
-  event:
-    exclude:
-    - pull_request
-
 steps:
 - name: set nigntly version
   image: busybox
@@ -19,10 +14,6 @@ steps:
   when:
     branch:
     - develop
-    event:
-    - cron
-    cron:
-    - nightly
 
 - name: set release version
   image: alpine/git
