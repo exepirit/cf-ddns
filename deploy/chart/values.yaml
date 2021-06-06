@@ -2,6 +2,15 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+provider:
+  type: cloudflare
+  parameters: {}
+  # cfApiKey: "API_KEY"
+  # cfApiEmail: "user@example.com"
+
+source:
+  type: kubernetes
+
 replicaCount: 1
 
 image:
