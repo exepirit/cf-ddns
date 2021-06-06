@@ -14,3 +14,4 @@ RUN go get ./... \
 FROM alpine:3
 WORKDIR /app
 COPY --from=builder /build/cf-ddns /app/
+CMD ["/app/cf-ddns"]
