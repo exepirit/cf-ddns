@@ -12,10 +12,27 @@ trigger:
     - pull_request
 
 steps:
-- name: get version
+- name: set nigntly version
+  image: busybox
+  commands:
+  - echo "nightly" > .tags
+  when:
+    branch:
+    - develop
+    event:
+    - cron
+    cron:
+    - nightly
+
+- name: set release version
   image: alpine/git
   commands:
-  - git rev-parse --short HEAD > .tags
+  - git tag --points-at HEAD > .tags
+  - echo ",latest" >> .tags
+  when:
+    branch:
+    - master
+
 - name: publish  
   image: plugins/docker
   settings:
