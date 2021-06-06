@@ -13,7 +13,7 @@ trigger:
 
 steps:
 - name: get version
-  image: apline/git
+  image: alpine/git
   commands:
   - git rev-parse --short HEAD > .tags
 - name: publish  
