@@ -31,5 +31,5 @@ jobs:
         with:
           push: true
           tags: |
-            ${{ github.repository }}:latest
-            ${{ github.repository }}:${{ env.RELEASE_VERSION }}
+            exepir1t/cf-ddns:latest
+            exepir1t/cf-ddns:${{ env.RELEASE_VERSION }}
