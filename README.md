@@ -17,6 +17,14 @@ go get github.com/exepirit/cf-ddns
 2. Set DNS provider credentials. To do this, fill appropriate environment variables, e.g `DDNS_CFEMAIL`, `DDNS_CFAPIKEY`.
 3. Run `cf-ddns`.
 
+## Roadmap
+
+- Write comrehensive documentation. ;)
+- Add `/etc/hosts` file as DNS provider support (for mDNS support).
+- Refactor tool configuration method. Use command line parameters along with environment variables.
+- Add PowerDNS provider support.
+- Add Bind as provider support.
+
 ## License
 
 ![MIT](https://choosealicense.com/licenses/mit/)

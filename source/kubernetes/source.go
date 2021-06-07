@@ -1,5 +1,3 @@
-// TODO: remove kubernetes/client-go usage
-
 package kubernetes
 
 import (
@@ -9,7 +7,7 @@ import (
 	"github.com/exepirit/cf-ddns/domain"
 	"github.com/pkg/errors"
 	core "k8s.io/api/core/v1"
-	networking "k8s.io/api/networking/v1beta1"
+	networking "k8s.io/api/networking/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -120,7 +118,7 @@ func (s *Source) getDomainNames(ctx context.Context) ([]string, error) {
 }
 
 func (s *Source) getIngresses(ctx context.Context) ([]networking.Ingress, error) {
-	ingressesClient := s.client.NetworkingV1beta1().Ingresses("default")
+	ingressesClient := s.client.NetworkingV1().Ingresses(meta.NamespaceAll)
 	ingresses, err := ingressesClient.List(ctx, meta.ListOptions{})
 	if err != nil {
 		return nil, err
