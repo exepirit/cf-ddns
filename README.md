@@ -19,7 +19,6 @@ go get github.com/exepirit/cf-ddns
 
 ## Roadmap
 
-- Rework CI pipeline: add nightly and arm64 builds.
 - Write comrehensive documentation. ;)
 - Add `/etc/hosts` file as DNS provider support (for mDNS support).
 - Refactor tool configuration method. Use command line parameters along with environment variables.
