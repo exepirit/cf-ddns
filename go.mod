@@ -6,6 +6,7 @@ require (
 	github.com/cloudflare/cloudflare-go v0.13.4
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.22.0
+	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	k8s.io/api v0.21.0
